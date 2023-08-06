@@ -1,4 +1,4 @@
-@extends('layouts.live-customer')
+@extends('layouts.app')
 @section('content')
 <div class="layout-px-spacing">
     <div class="layout-top-spacing layout-spacing">
@@ -26,6 +26,9 @@
                     @if ($keranjang_list->isEmpty())
                     <h3 class="text-center">Keranjang Kosong</h3>
                     @else
+                    <form action="{{ route('keranjang.update_all') }}" id="form-checkout" method="post">
+                        @csrf
+                        @method('patch')
                     @foreach ($keranjang_list as $keranjang)
                     <li class="list-group-item list-group-item-action">
                         <div class="media">
@@ -36,15 +39,14 @@
                                 <h6 class="tx-inverse">{{$keranjang->produk->nama_produk}}</h6>
                                 <p class="mg-b-0">Rp {{ number_format($keranjang->produk->harga, 0, '.', ',') }}</p>
                                 <p class="mg-b-0">Quantity: {{$keranjang->qty}}</p>
-                                <form action="{{route('keranjang.update', ['keranjang' => $keranjang->id])}}" id="form-checkout" method="post">
-                                    @csrf
-                                    @method('patch')
-                                <input type="hidden" name="keranjangId" value="{{$keranjang->id}}">
-                                </form>
+
+                                <input type="hidden" name="keranjangIds[]" value="{{$keranjang->id}}">
+
                             </div>
                         </div>
                     </li>
                     @endforeach
+                    </form>
                     @endif
                     @if ($total_price == 0)
                     @else

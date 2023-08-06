@@ -18,6 +18,7 @@
                 <img width="150px" src="{{ url('storage/'.$produk->image) }}" alt="{{$produk->image}}" />
                 <p class="modal-text">Harga: Rp. {{ number_format($produkHarga, 0, '.', ',') }}</p>
                 <p class="modal-text">Stock: {{$produkStock}}</p>
+                @auth
                 <form action="{{route('keranjang.store')}}" id="form-create{{$produkId}}" method="post">
                     @csrf
                     <input type="hidden" name="stock" value="{{$produkStock}}">
@@ -33,6 +34,9 @@
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Discard</button>
                 <button type="submit" onclick="confirmSubmit('{{$produkId}}')" id="submit" class="btn btn-primary">Save</button>
+                @else
+                <h3 class="modal-heading mb-4 mt-2">Jika ingin memesan, silahkan login terlebih dahulu</h3>
+                @endauth
             </div>
         </div>
     </div>

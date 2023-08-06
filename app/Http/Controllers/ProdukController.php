@@ -59,9 +59,9 @@ class ProdukController extends Controller
         $newProduk->harga = $request->harga;
 
         $image = $request->file('image');
-        $directory ='image/images/produk/';
+        $directory ='image/produk/';
         $imageName = uniqid().'_'.$image->getClientOriginalName();
-        Storage::disk('local')->put($directory.$imageName, file_get_contents($image));
+        Storage::disk('public')->put($directory.$imageName, file_get_contents($image));
         $newProduk->image = $directory.$imageName;
 
         try {
@@ -129,9 +129,10 @@ class ProdukController extends Controller
 
         $image = $request->file('image');
         if($image){
-            $directory ='image/images/produk/';
+            Storage::disk('public')->delete($produk->image);
+            $directory ='image/produk/';
             $imageName = uniqid().'_'.$image->getClientOriginalName();
-            Storage::disk('local')->put($directory.$imageName, file_get_contents($image));
+            Storage::disk('public')->put($directory.$imageName, file_get_contents($image));
             $produk->image = $directory.$imageName;
         }
         try {
@@ -152,6 +153,7 @@ class ProdukController extends Controller
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
+        Storage::disk('public')->delete($produk->image);
         try {
             $produk->delete();
             return redirect()->route('produk.index')->with('success', "Produk berhasil dihapus");

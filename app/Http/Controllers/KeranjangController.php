@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Keranjang;
+use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use SebastianBergmann\CodeCoverage\Report\Xml\Totals;
@@ -17,10 +18,12 @@ class KeranjangController extends Controller
     public function index()
     {
         $keranjangList = Keranjang::where('status_checkout', 'Tidak')
-                                    ->get();
+            ->where('id_user', Auth::id())
+            ->get();
         $totalPrice = Keranjang::join('tbl_produk', 'tbl_keranjang.id_produk', '=', 'tbl_produk.id')
-                                ->where('status_checkout', 'Tidak')
-                                ->sum('harga');
+            ->where('tbl_keranjang.status_checkout', 'Tidak')
+            ->where('tbl_keranjang.id_user', Auth::id())
+            ->sum('harga');
         $data = [
             'page_name' => 'Keranjang',
             'category_name' => 'keranjang',
@@ -50,19 +53,18 @@ class KeranjangController extends Controller
     {
         $this->validate($request, [
             'qty' => 'required|numeric',
-		]);
+        ]);
         $stock = $request->stock;
         $newKeranjang = new Keranjang();
-        if($stock < $request->qty){
+        if ($stock < $request->qty) {
             return redirect()->route('customer.index')->with('info', "Quantity lebih besar dibandingkan stock");
-        }else{
+        } else {
             $newKeranjang->qty = $request->qty;
             $newKeranjang->id_produk = $request->idProduk;
             $newKeranjang->id_user = Auth::id();
             try {
                 $newKeranjang->save();
                 return redirect()->route('keranjang.index')->with('success', "Keranjang Berhasil Dimasukkan");
-
             } catch (\Throwable $th) {
                 return redirect()->route('keranjang.index')->withErrors($th->getMessage());
             }
@@ -77,7 +79,6 @@ class KeranjangController extends Controller
      */
     public function show($id)
     {
-
     }
 
     /**
@@ -88,7 +89,6 @@ class KeranjangController extends Controller
      */
     public function edit($id)
     {
-
     }
 
     /**
@@ -100,15 +100,6 @@ class KeranjangController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $keranjang = Keranjang::findOrFail($id);
-        $keranjang->status_checkout = 'Ya';
-        try {
-            $keranjang->save();
-            return redirect()->route('keranjang.index')->with('success','Keranjang telah dicheckout');
-
-        } catch (\Throwable $th) {
-            return redirect()->route('keranjang.index')->withErrors($th->getMessage());
-        }
     }
 
     /**
@@ -120,5 +111,25 @@ class KeranjangController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function update_all(Request $request)
+    {
+        $keranjangIds = $request->input('keranjangIds');
+        foreach ($keranjangIds as $keranjangId) {
+            $keranjang = Keranjang::findOrFail($keranjangId);
+            $keranjang->status_checkout = 'Ya';
+            $produk = Produk::findOrFail($keranjang->id_produk);
+            $produk->stock = ($produk->stock - $keranjang->qty);
+
+            try {
+                $keranjang->save();
+                $produk->save();
+            } catch (\Throwable $th) {
+                return redirect()->route('keranjang.index')->withErrors($th->getMessage());
+            }
+        }
+
+        return redirect()->route('keranjang.index')->with('success', 'Keranjang telah dicheckout');
     }
 }

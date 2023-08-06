@@ -28,11 +28,24 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
+
         $request->authenticate();
 
         $request->session()->regenerate();
+        $source = $request->query('source');
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $role = Auth::user()->akses;
+
+        // if ($source === 'cms' && $role === 1) {
+        //     return redirect()->intended(RouteServiceProvider::HOME)
+        //     ->withErrors(['message' => 'You cannot login from here.']);
+        // }
+        if ($role == 0){
+            return redirect()->intended(RouteServiceProvider::HOME);
+        }else{
+            return redirect('customer');
+        }
+
     }
 
     /**
@@ -43,12 +56,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        $role = Auth::user()->akses;
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+        if ($role == 0){
+            return redirect('/');
+        }else{
+            return redirect('customer');
+        }
 
-        return redirect('/');
     }
 }

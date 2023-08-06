@@ -9,7 +9,7 @@
 
                     <h1 class="">Daftar</h1>
                     <p class="signup-link register">Sudah punya akun? <a href="{{ route('login') }}">Log in</a></p>
-                    <form class="text-left" method="POST" action="{{ route('register') }}">
+                    <form class="text-left" method="POST" action="{{ route('register', ['source' => 'cms']) }}">
                         @csrf
                         <div class="form">
                             <input type="hidden" name="role" value="Administrator">

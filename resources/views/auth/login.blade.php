@@ -10,7 +10,7 @@
                     <h1 class="">Masuk</h1>
                     <p class="">Login Untuk Memasuki CMS</p>
 
-                    <form class="text-left" method="POST" action="{{ route('login') }}">
+                    <form class="text-left" method="POST" action="{{ route('login', ['source' => 'cms']) }}">
                         @csrf
                         <div class="form">
                             <!-- Session Status -->

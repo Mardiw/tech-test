@@ -17,13 +17,16 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::group(['middleware' => ['auth', 'verified']], function () {
-    Route::resources([
-        'produk' => App\Http\Controllers\ProdukController::class
-    ]);
+Route::middleware(['auth'])->group(function () {
+    Route::resource('produk', App\Http\Controllers\ProdukController::class)
+        ->middleware('checkRole:0');
+
+    Route::resource('keranjang', App\Http\Controllers\KeranjangController::class)
+        ->middleware('checkRole:1');
+    Route::patch('/keranjang_update_all', [App\Http\Controllers\KeranjangController::class, 'update_all'])->name('keranjang.update_all')->middleware('checkRole:1');
 });
 
-Route::get('/customer', '\App\Http\Controllers\CustomerController@index')->name('customer.index');
-Route::resource('keranjang', App\Http\Controllers\KeranjangController::class);
+Route::get('/customer', [App\Http\Controllers\CustomerController::class, 'index'])
+    ->name('customer.index');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

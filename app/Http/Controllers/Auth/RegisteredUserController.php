@@ -40,18 +40,31 @@ class RegisteredUserController extends Controller
             'phone' => 'required|numeric',
         ]);
 
+        $source = $request->input('source');
+
+        if ($source == 'cms') {
+            $akses = '0';
+        } else {
+            $akses = '1';
+        }
+
+
         $user = User::create([
             'nama' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'nohp' => $request->phone,
             'alamat' => $request->alamat,
+            'akses' => $akses
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
-
-        return redirect(RouteServiceProvider::HOME);
+        if ($source == 'cms') {
+            return redirect(RouteServiceProvider::HOME);
+        } else {
+            return redirect('customer');
+        }
     }
 }
